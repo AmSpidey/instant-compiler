@@ -25,20 +25,22 @@ source-repository head
 
 library
   exposed-modules:
-      Abs
+      AbsInstant
       ErrM
-      Lex
-      Lib
-      Par
-      Print
-      Skel
-      Test
+      LexInstant
+      LLVMCompiler
+      ParInstant
+      PrintInstant
+      SkelInstant
   other-modules:
       Paths_instant
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
+    , mtl
+    , unordered-containers
   default-language: Haskell2010
 
 executable instant-exe
@@ -49,8 +51,11 @@ executable instant-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , instant
+    , mtl
+    , unordered-containers
   default-language: Haskell2010
 
 test-suite instant-test
@@ -62,6 +67,9 @@ test-suite instant-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , instant
+    , mtl
+    , unordered-containers
   default-language: Haskell2010
