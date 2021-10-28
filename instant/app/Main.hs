@@ -39,25 +39,14 @@ run v p f s = let ts = myLLexer s in case p ts of
                           exitFailure
            Ok  tree ->    let compiled = compileLLVM tree
                           in
-                          do writeFile (combine (dropExtensions f) ".ll") compiled
+                          do putStrLn $ dropExtension f
+                             writeFile (addExtension (dropExtensions f) ".ll") compiled
                              exitSuccess
-
-usage :: IO ()
-usage = do
-  putStrLn $ unlines
-    [ "usage: Call with one of the following argument combinations:"
-    , "  --help          Display this help message."
-    , "  (no arguments)  Parse stdin verbosely."
-    , "  (files)         Parse content of files verbosely."
-    , "  -s (files)      Silent mode. Parse content of files silently."
-    ]
-  exitFailure
 
 main :: IO ()
 main = do
-  args <- getArgs
-  case args of
-    fs -> mapM_ (runFile 2 pProgram) fs
+  fs <- getArgs
+  mapM_ (runFile 2 pProgram) fs
 
 
 

@@ -19,7 +19,7 @@ instance Show Expr where
     show (OpExpr Add val1 val2) = "add i32 " ++ show val1 ++ ", " ++ show val2
     show (OpExpr Sub val1 val2) = "sub i32 " ++ show val1 ++ ", " ++ show val2
     show (OpExpr Mul val1 val2) = "mul i32 " ++ show val1 ++ ", " ++ show val2
-    show (OpExpr Div val1 val2) = "udiv i32 " ++ show val1 ++ ", " ++ show val2
+    show (OpExpr Div val1 val2) = "sdiv i32 " ++ show val1 ++ ", " ++ show val2
 instance Show LLVMStmt where
     show (Print val) = "call void @printInt(i32 " ++ show val ++ ")"
     show (Ass var val) = "store i32 " ++ show val ++ ", i32* " ++ varPtr var
@@ -34,7 +34,7 @@ data LightExp = LExp Operand LightExp LightExp | LExpLit Integer | LExpVar Ident
 
 prolog :: String
 prolog = "declare i32 @printf(i8*, ...) \n\
-\@dnl = internal constant [4 x i8] c\"%d\0A\00\" \n\
+\@dnl = internal constant [4 x i8] c\"%d\\0A\\00\" \n\
 \define void @printInt(i32 %x) { \n\
 \       %t0 = getelementptr [4 x i8], [4 x i8]* @dnl, i32 0, i32 0 \n\
 \       call i32 (i8*, ...) @printf(i8* %t0, i32 %x) \n\

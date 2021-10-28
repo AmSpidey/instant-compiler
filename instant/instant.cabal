@@ -5,13 +5,9 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           instant
-version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/instant#readme>
-homepage:       https://github.com/githubuser/instant#readme
-bug-reports:    https://github.com/githubuser/instant/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2021 Author name here
+version:        0.0.0
+author:         Marta Nowakowska
+maintainer:     Marta Nowakowska
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -19,19 +15,17 @@ extra-source-files:
     README.md
     ChangeLog.md
 
-source-repository head
-  type: git
-  location: https://github.com/githubuser/instant
-
 library
   exposed-modules:
       AbsInstant
       ErrM
+      JVMCompiler
       LexInstant
       LLVMCompiler
       ParInstant
       PrintInstant
       SkelInstant
+      TestUtils
   other-modules:
       Paths_instant
   hs-source-dirs:
@@ -39,8 +33,10 @@ library
   build-depends:
       array
     , base >=4.7 && <5
+    , containers
     , filepath
     , mtl
+    , random
     , unordered-containers
   default-language: Haskell2010
 
@@ -54,8 +50,10 @@ executable instant-exe
   build-depends:
       array
     , base >=4.7 && <5
+    , containers
     , filepath
     , instant
     , mtl
+    , random
     , unordered-containers
   default-language: Haskell2010
