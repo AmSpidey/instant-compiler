@@ -2,12 +2,11 @@ module LLVMCompiler where
 import AbsInstant
 import Control.Monad.State
 import qualified Data.HashSet as HS hiding (map)
-import Numeric (Floating(expm1))
+import Common
 
 type Var = String
 type Register = String
 data Value = Lit Integer | Reg Register
-data Operand = Add | Sub | Mul | Div
 data Expr = OpExpr Operand Value Value | ValExpr Value
 data LLVMStmt = Print Value | Ass Var Value | AssReg Register Expr
 newtype LLVMRepr = Repr [LLVMStmt]
@@ -30,8 +29,6 @@ instance Show LLVMRepr where
     show (Repr []) = ""    
 type LLVMM a = State Integer a
 
-data LightExp = LExp Operand LightExp LightExp | LExpLit Integer | LExpVar Ident
-
 prolog :: String
 prolog = "declare i32 @printf(i8*, ...) \n\
 \@dnl = internal constant [4 x i8] c\"%d\\0A\\00\" \n\
@@ -44,14 +41,6 @@ prolog = "declare i32 @printf(i8*, ...) \n\
 
 epilog :: String
 epilog = "ret i32 0\n}"
-
-simplifyExp :: Exp -> LightExp
-simplifyExp (ExpAdd exp1 exp2) = LExp Add (simplifyExp exp1) (simplifyExp exp2)
-simplifyExp (ExpSub exp1 exp2) = LExp Sub (simplifyExp exp1) (simplifyExp exp2)
-simplifyExp (ExpMul exp1 exp2) = LExp Mul (simplifyExp exp1) (simplifyExp exp2)
-simplifyExp (ExpDiv exp1 exp2) = LExp Div (simplifyExp exp1) (simplifyExp exp2)
-simplifyExp (ExpLit int) = LExpLit int
-simplifyExp (ExpVar ident) = LExpVar ident
 
 varPtr :: String -> String
 varPtr var = "%ptr_" ++ var
@@ -69,18 +58,6 @@ declareVariables (Prog stmts) =
         declare :: String -> String
         declare var = varPtr var ++ " = alloca i32\n"
 
-collectVariables :: [Stmt] -> HS.HashSet String
-collectVariables stmts = HS.fromList $ concatMap collectFromStmt stmts where
-    collectFromStmt :: Stmt -> [String]
-    collectFromStmt (SAss (Ident ident) exp) = ident : collectFromStmt (SExp exp)
-    collectFromStmt (SExp exp) = collectFromExpr exp where
-        collectFromExpr (ExpAdd exp1 exp2) = collectFromExpr exp1 ++ collectFromExpr exp2
-        collectFromExpr (ExpSub exp1 exp2) = collectFromExpr exp1 ++ collectFromExpr exp2
-        collectFromExpr (ExpMul exp1 exp2) = collectFromExpr exp1 ++ collectFromExpr exp2
-        collectFromExpr (ExpDiv exp1 exp2) = collectFromExpr exp1 ++ collectFromExpr exp2
-        collectFromExpr (ExpVar (Ident ident)) = [ident]
-        collectFromExpr (ExpLit _) = []
-
 compileInternal :: Program -> String
 compileInternal (Prog stmts) = let
     repr = (flip evalState 0 . internalRepr) stmts
@@ -90,12 +67,6 @@ internalRepr :: [Stmt] -> LLVMM LLVMRepr
 internalRepr stmts = do
     lines <- mapM compileLine stmts
     return $ Repr $ concat lines
-
-concatLines :: [LLVMM [LLVMStmt]] -> LLVMM [LLVMStmt]
-concatLines (x:xs) = do
-    y <- x
-    return []
-concatLines _ = undefined
 
 compileLine :: Stmt -> LLVMM [LLVMStmt]
 compileLine (SAss (Ident ident) exp) = do

@@ -5,6 +5,7 @@ import System.IO ( stdin, hGetContents )
 import System.Environment ( getArgs, getProgName )
 import System.Exit ( exitFailure, exitSuccess )
 import System.FilePath
+import SimpleCmd ( cmd )
 
 import LexInstant
 import ParInstant
@@ -12,9 +13,6 @@ import SkelInstant
 import PrintInstant
 import AbsInstant
 import LLVMCompiler ( compileLLVM )
-
-
-
 
 import ErrM
 
@@ -39,8 +37,11 @@ run v p f s = let ts = myLLexer s in case p ts of
                           exitFailure
            Ok  tree ->    let compiled = compileLLVM tree
                           in
-                          do putStrLn $ dropExtension f
-                             writeFile (addExtension (dropExtensions f) ".ll") compiled
+                          do let basename = dropExtension f
+                                 ll = addExtension basename ".ll"
+                                 bc = addExtension basename ".bc"
+                             writeFile ll compiled
+                             cmd "llvm-as" ["-o", bc, ll]
                              exitSuccess
 
 main :: IO ()

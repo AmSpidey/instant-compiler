@@ -8,9 +8,10 @@ extra-source-files:
 dependencies:
 - base >= 4.7 && < 5
 - array
-- unordered-containers
+- hashmap
 - mtl
 - filepath
+- simple-cmd
 - containers # delete
 - random # delete
 
@@ -18,12 +19,24 @@ library:
   source-dirs: src
 
 executables:
-  instant-exe:
+  insc_llvm:
     main:                Main.hs
-    source-dirs:         app
+    other-modules:       []
+    source-dirs:         src/llvm
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - instant
+  insc_jvm:
+    main:                Main.hs
+    other-modules:       []
+    source-dirs:         src/jvm
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - instant
+
