@@ -9,13 +9,14 @@ import Data.HashMap (HashMap)
 import Data.Ix(inRange)
 
 newtype FlexInt = FInt Integer
-data JVMStmt = Print | Op Operand | Load FlexInt | Store FlexInt | Push Integer
+data JVMStmt = PrePrint | Print | Op Operand | Load FlexInt | Store FlexInt | Push Integer
 newtype JVMRepr = Repr [JVMStmt]
 instance Show FlexInt where
     show (FInt int)
-        | inRange (0, 5) int = "_" ++ show int
+        | inRange (0, 3) int = "_" ++ show int
         | otherwise = " " ++ show int
 instance Show JVMStmt where
+    show PrePrint = "getstatic java/lang/System/out Ljava/io/PrintStream;"
     show Print = "invokevirtual java/io/PrintStream/println(I)V"
     show (Op Add) = "iadd"
     show (Op Mul) = "imul"
@@ -51,9 +52,9 @@ declareStackSize :: Integer -> String
 declareStackSize k = ".limit stack " ++ show k ++ "\n"
 
 declareVariables :: Int -> String
-declareVariables n = ".limit locals " ++ show n ++ "\n" ++ concatMap declare [1..n] where
+declareVariables n = ".limit locals " ++ show (n + 1) ++ "\n" ++ concatMap declare [1..n] where
         declare :: Int -> String
-        declare k = "push 0\nistore "  ++ show k ++ "\n"
+        declare k = "iconst_0\nistore"  ++ show (FInt $ fromIntegral k) ++ "\n"
 
 optimizeStack :: [LightStmt] -> ([LightStmt], Integer)
 optimizeStack stmts = let
@@ -66,7 +67,7 @@ optimizeStackStmt (LSAss ident exp) = let
     in (LSAss ident oe, s)
 optimizeStackStmt (LSExp exp) = let
     (oe, s) = optimizeExp exp
-    in (LSExp exp, s)
+    in (LSExp exp, s + 1) -- +1 for the PrintStream
 
 optimizeExp :: LightExp -> (LightExp, Integer)
 optimizeExp (LExpLit int) = (LExpLit int, 1)
@@ -85,24 +86,26 @@ createEnvironment (Prog stmts) =
 
 compileInternal :: [LightStmt] -> JVMM JVMRepr
 compileInternal stmts = do
-    lines <- mapM compileLine stmts
+    (lines, stack_sizes) <- unzip <$> mapM compileLine stmts
     return $ Repr $ concat lines
 
-compileLine :: LightStmt -> JVMM [JVMStmt]
+-- Result: (statements, stack size)
+compileLine :: LightStmt -> JVMM ([JVMStmt], Integer)
 compileLine (LSAss (Ident ident) exp) = do
-    exp <- compileExp exp
+    (exp, s) <- compileExp exp
     env <- ask
-    return $ exp ++ [Store $ FInt $ HM.findWithDefault (-1) ident env]
+    return (exp ++ [Store $ FInt $ HM.findWithDefault (-1) ident env], s)
 compileLine (LSExp exp) = do
-    exp <- compileExp exp
-    return $ exp ++ [Print]
+    (exp, s) <- compileExp exp
+    return ([PrePrint] ++ exp ++ [Print], s)
 
-compileExp :: LightExp -> JVMM [JVMStmt]
+compileExp :: LightExp -> JVMM ([JVMStmt], Integer)
 compileExp (LExp op exp1 exp2) = do
-    exp1m <- compileExp exp1
-    exp2m <- compileExp exp2
-    return $ exp1m ++ exp2m ++ [Op op]
-compileExp (LExpLit int) = return [Push int]
+    (exp1m, s1) <- compileExp exp1
+    (exp2m, s2) <- compileExp exp2
+    return $ if s1 > s2 then (exp1m ++ exp2m ++ [Op op], s1) 
+    else (exp2m ++ exp1m ++ [Op op], s2)
+compileExp (LExpLit int) = return ([Push int], 1)
 compileExp (LExpVar (Ident ident)) = do
     env <- ask 
-    return [Load $ FInt$ HM.findWithDefault (-1) ident env]
+    return ([Load $ FInt$ HM.findWithDefault (-1) ident env], 1)
