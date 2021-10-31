@@ -2,7 +2,9 @@ module Common where
 import AbsInstant
 import qualified Data.HashSet as HS hiding (map)
 
-data Operand = Add | Sub | Mul | Div
+data COp = Add | Mul
+data NCop = Div | Sub
+data Operand = COp COp| NCop NCop
 data LightExp = LExp Operand LightExp LightExp | LExpLit Integer | LExpVar Ident
 data LightStmt = LSAss Ident LightExp | LSExp LightExp
 
@@ -14,10 +16,10 @@ simplifyStmt (SAss id exp) = LSAss id $ simplifyExp exp
 simplifyStmt (SExp exp) = LSExp $ simplifyExp exp
 
 simplifyExp :: Exp -> LightExp
-simplifyExp (ExpAdd exp1 exp2) = LExp Add (simplifyExp exp1) (simplifyExp exp2)
-simplifyExp (ExpSub exp1 exp2) = LExp Sub (simplifyExp exp1) (simplifyExp exp2)
-simplifyExp (ExpMul exp1 exp2) = LExp Mul (simplifyExp exp1) (simplifyExp exp2)
-simplifyExp (ExpDiv exp1 exp2) = LExp Div (simplifyExp exp1) (simplifyExp exp2)
+simplifyExp (ExpAdd exp1 exp2) = LExp (COp Add) (simplifyExp exp1) (simplifyExp exp2)
+simplifyExp (ExpSub exp1 exp2) = LExp (NCop Sub) (simplifyExp exp1) (simplifyExp exp2)
+simplifyExp (ExpMul exp1 exp2) = LExp (COp Mul) (simplifyExp exp1) (simplifyExp exp2)
+simplifyExp (ExpDiv exp1 exp2) = LExp (NCop Div) (simplifyExp exp1) (simplifyExp exp2)
 simplifyExp (ExpLit int) = LExpLit int
 simplifyExp (ExpVar ident) = LExpVar ident
 

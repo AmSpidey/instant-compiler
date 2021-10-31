@@ -12,12 +12,9 @@ dependencies:
 - mtl
 - filepath
 - simple-cmd
-- containers # delete
-- random # delete
 
 library:
   source-dirs: src
-
 executables:
   insc_llvm:
     main:                Main.hs

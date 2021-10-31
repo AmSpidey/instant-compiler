@@ -45,7 +45,6 @@ run v p f s = let ts = myLLexer s in case p ts of
                           do let basename = dropExtension f
                                  j = addExtension basename ".j"
                                  dir = takeDirectory f
-                                 --jasmin = dir </> "lib/jasmin.jar"
                              writeFile j compiled
                              cmd "java" ["-jar", jasminPath, "-d", dir, j]
                              cmd "mkdir" ["-p", dir </> "lib"]

@@ -15,10 +15,10 @@ instance Show Value where
     show (Lit lit) = show lit
 instance Show Expr where
     show (ValExpr valexpr) = show valexpr
-    show (OpExpr Add val1 val2) = "add i32 " ++ show val1 ++ ", " ++ show val2
-    show (OpExpr Sub val1 val2) = "sub i32 " ++ show val1 ++ ", " ++ show val2
-    show (OpExpr Mul val1 val2) = "mul i32 " ++ show val1 ++ ", " ++ show val2
-    show (OpExpr Div val1 val2) = "sdiv i32 " ++ show val1 ++ ", " ++ show val2
+    show (OpExpr (COp Add) val1 val2) = "add i32 " ++ show val1 ++ ", " ++ show val2
+    show (OpExpr (NCop Sub) val1 val2) = "sub i32 " ++ show val1 ++ ", " ++ show val2
+    show (OpExpr (COp Mul) val1 val2) = "mul i32 " ++ show val1 ++ ", " ++ show val2
+    show (OpExpr (NCop Div) val1 val2) = "sdiv i32 " ++ show val1 ++ ", " ++ show val2
 instance Show LLVMStmt where
     show (Print val) = "call void @printInt(i32 " ++ show val ++ ")"
     show (Ass var val) = "store i32 " ++ show val ++ ", i32* " ++ varPtr var
