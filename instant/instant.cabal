@@ -26,7 +26,6 @@ library
       ParInstant
       PrintInstant
       SkelInstant
-      TestUtils
   other-modules:
       Paths_instant
   hs-source-dirs:
@@ -34,11 +33,9 @@ library
   build-depends:
       array
     , base >=4.7 && <5
-    , containers
     , filepath
     , hashmap
     , mtl
-    , random
     , simple-cmd
   default-language: Haskell2010
 
@@ -50,12 +47,10 @@ executable insc_jvm
   build-depends:
       array
     , base >=4.7 && <5
-    , containers
     , filepath
     , hashmap
     , instant
     , mtl
-    , random
     , simple-cmd
   default-language: Haskell2010
 
@@ -67,11 +62,9 @@ executable insc_llvm
   build-depends:
       array
     , base >=4.7 && <5
-    , containers
     , filepath
     , hashmap
     , instant
     , mtl
-    , random
     , simple-cmd
   default-language: Haskell2010
